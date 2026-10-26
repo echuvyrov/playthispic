@@ -524,6 +524,13 @@ async function connectSpotify() {
     }
     return;
   }
+  const isMobileBrowser = /iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  if (isMobileBrowser) {
+    elements.loginDescription.textContent = "Opening Spotify securely in this tab…";
+    window.location.assign("/auth/spotify/start");
+    return;
+  }
   if (loginWindow && !loginWindow.closed) { loginWindow.focus(); return; }
   loginWindow = window.open("/auth/spotify/start", "playthispic-spotify", "popup,width=560,height=760");
   if (!loginWindow) {

@@ -101,6 +101,8 @@ Create an app at the [Spotify Developer Dashboard](https://developer.spotify.com
 
 Then set `SPOTIFY_CLIENT_ID` and `SPOTIFY_REDIRECT_URI` in `.env` and restart the server. Spotify's PKCE flow keeps the client secret out of this app. The Connect Spotify button opens Spotify in a separate window. After approval, extracted songs are searched with `track:` and `artist:` filters; you choose candidates before creating a playlist. The app stores the access token in memory on the server and loses sessions on restart.
 
+On iPhone and iPad, the Connect Spotify button uses same-tab OAuth because Safari commonly blocks popup-based sign-in. For a phone connecting to a development machine, use an HTTPS tunnel or the deployed HTTPS URL; `127.0.0.1` on the phone refers to the phone itself. Register the exact tunnel or production callback URL with Spotify.
+
 Each song is searched up to three ways: precise `track:` and `artist:` filters, a broad combined query, and a title-only query when needed. Results are deduplicated and fuzzy-ranked so small OCR errors can still surface a likely match. Search is intentionally conservative: it presents candidates for review rather than silently accepting a fuzzy result. Once connected, a tentative Spotify playlist is created empty and updated as candidates are found; selecting a different candidate replaces that song's provisional track instead of leaving a duplicate behind.
 
 Routes: `GET /auth/spotify/start`, `GET /auth/spotify/callback`, `GET /api/spotify/status`, `POST /api/spotify/search`, `POST /api/spotify/create-playlist`, `POST /api/spotify/disconnect`.

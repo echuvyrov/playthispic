@@ -54,7 +54,7 @@ export function createSpotifyIntegration({ env = process.env, fetchImpl = fetch,
   const finish = (res, ok) => {
     const nonce = random();
     res.writeHead(200, { "Content-Type": "text/html; charset=utf-8", "Cache-Control": "no-store", "Referrer-Policy": "no-referrer", "Content-Security-Policy": `default-src 'none'; script-src 'nonce-${nonce}'; frame-ancestors 'none'` });
-    res.end(`<!doctype html><html><head><title>Spotify connection</title></head><body><h1>${ok ? "Spotify connected" : "Spotify connection did not complete"}</h1><p>${ok ? "You can return to PlayThisPic." : "Return to PlayThisPic and try again."}</p><a href="/">Return to PlayThisPic</a><script nonce="${nonce}">if(window.opener){window.opener.postMessage({type:"spotify-auth",success:${ok}},location.origin);window.close();}</script></body></html>`);
+    res.end(`<!doctype html><html><head><title>Spotify connection</title></head><body><h1>${ok ? "Spotify connected" : "Spotify connection did not complete"}</h1><p>${ok ? "Returning to PlayThisPic…" : "Returning to PlayThisPic…"}</p><a href="/">Return to PlayThisPic</a><script nonce="${nonce}">if(window.opener){window.opener.postMessage({type:"spotify-auth",success:${ok}},location.origin);window.close();}else{location.replace("/?spotify=${ok ? "success" : "cancelled"}");}</script></body></html>`);
   };
   const spotifyFetch = async (session, path, options = {}) => {
     if (!session?.token) throw Object.assign(new Error("Connect Spotify before using Spotify features."), { status: 401 });
