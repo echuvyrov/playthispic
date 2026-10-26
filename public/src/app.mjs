@@ -360,7 +360,7 @@ function renderRows() {
     node.querySelector(".artist-edit").value = row.artist;
     node.querySelector(".title-edit").value = row.title;
     node.querySelector(".track-issues").textContent = row.issues.join(" · ");
-    node.querySelector(".accept").disabled = !row.artist.trim() || !row.title.trim();
+    node.querySelector(".accept").disabled = !best || !row.artist.trim() || !row.title.trim();
     node.querySelector(".confidence").textContent = state.demo ? `${Math.round(row.confidence * 100)}% demo` : row.status === "accepted" ? "Reviewed" : row.issues.length ? "Check" : "Extracted";
     node.querySelector(".confidence").dataset.level = row.confidence >= 0.82 ? "high" : row.confidence >= 0.55 ? "mid" : "low";
 
@@ -433,11 +433,12 @@ function renderRows() {
 }
 
 function updateStats() {
+  const selectedRows = state.rows.filter((row) => row.status === "accepted" && row.candidates?.some((candidate) => candidate.id === row.selectedId && candidate.uri));
   const counts = {
     accepted: state.rows.filter((row) => row.candidates?.length).length,
     review: state.rows.filter((row) => !row.candidates?.length && row.status !== "skipped").length,
-    skipped: state.rows.filter((row) => row.status === "accepted").length,
-    selected: state.rows.filter((row) => row.status === "accepted").length
+    skipped: state.rows.filter((row) => row.status === "skipped").length,
+    selected: selectedRows.length
   };
 
   elements.acceptedCount.textContent = counts.accepted;
@@ -536,6 +537,19 @@ window.addEventListener("message", async (event) => {
   window.clearInterval(loginPoll);
   await refreshSpotifyStatus();
   if (!event.data.success) elements.loginDescription.textContent = "Spotify sign-in did not complete. Please try again.";
+  if (event.data.success && state.connected && state.rows.length && !state.demo) {
+    const controller = new AbortController();
+    extractionController?.abort();
+    extractionController = controller;
+    elements.catalogNotice.textContent = "Spotify is connected. Searching its catalog for your extracted songs.";
+    try {
+      await searchSpotifyMatches(state.rows, controller.signal);
+      renderRows();
+    } catch (error) {
+      if (error.name !== "AbortError") elements.catalogNotice.textContent = error.message;
+      renderRows();
+    }
+  }
 });
 
 async function createPlaylist() {
