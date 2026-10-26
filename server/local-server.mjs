@@ -2,7 +2,7 @@ import { createReadStream, existsSync } from "node:fs";
 import { createServer } from "node:http";
 import { extname, join, normalize, resolve } from "node:path";
 import { loadEnvFile } from "node:process";
-import { extractionInstructions, tracklistFormat, runExtractionHarness } from "../src/extraction.mjs";
+import { extractionInstructions, tracklistFormat, runExtractionHarness } from "../public/src/extraction.mjs";
 import { createBeatportAuth } from "./beatport-auth.mjs";
 import { createSpotifyIntegration } from "./spotify.mjs";
 

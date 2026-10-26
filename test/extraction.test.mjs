@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { runExtractionHarness, validateTracks } from "../src/extraction.mjs";
-import { matchRows, parseTrackRows, structuredTrackRows, createExport } from "../src/core.mjs";
+import { runExtractionHarness, validateTracks } from "../public/src/extraction.mjs";
+import { matchRows, parseTrackRows, structuredTrackRows, createExport } from "../public/src/core.mjs";
 
 const song = (overrides = {}) => ({ artist: "Bicep", title: "Glue", position: 12, source_text: "12 Glue Bicep", uncertain: false, ...overrides });
 const result = (...tracks) => ({ raw_text: "12 Glue Bicep", tracks });

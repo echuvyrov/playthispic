@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createExport, demoCatalog, matchRows, parseTrackRows, scoreCandidate } from "../src/core.mjs";
+import { createExport, demoCatalog, matchRows, parseTrackRows, scoreCandidate } from "../public/src/core.mjs";
 
 test("parses numbered artist-title rows and remix names", () => {
   const rows = parseTrackRows("1. Peggy Gou - It Goes Like Nanana\n2) Mochakk - Jealous (Extended Mix)");
