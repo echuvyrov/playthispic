@@ -98,11 +98,15 @@ test("tentative playlist can be created empty, then updated with a track", async
 });
 
 test("playlist metadata and removals tolerate Spotify's empty success responses", async () => {
-  const handler = createSpotifyIntegration({ env, fetchImpl: async (url) => {
+  let removalBody;
+  const handler = createSpotifyIntegration({ env, fetchImpl: async (url, options = {}) => {
     if (url.includes("/api/token")) return token();
     if (url.endsWith("/me")) return new Response(JSON.stringify({ id: "user" }));
     if (url.endsWith("/playlists/playlist")) return new Response(null, { status: 200 });
-    if (url.includes("/playlists/playlist/items")) return new Response(null, { status: 200 });
+    if (url.includes("/playlists/playlist/items")) {
+      if (options.method === "DELETE") removalBody = JSON.parse(options.body);
+      return new Response(null, { status: 200 });
+    }
     return new Response(JSON.stringify({ snapshot_id: "snap" }));
   } });
   const start = await request(handler, "/auth/spotify/start");
@@ -117,6 +121,7 @@ test("playlist metadata and removals tolerate Spotify's empty success responses"
   });
   assert.equal(response.status, 201);
   assert.equal(JSON.parse(response.body).count, 1);
+  assert.deepEqual(removalBody, { items: [{ uri: "spotify:track:old" }] });
 });
 
 test("Spotify callbacks reject mismatched state and playlist requests require a session", async () => {

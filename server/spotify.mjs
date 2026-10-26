@@ -154,7 +154,7 @@ export function createSpotifyIntegration({ env = process.env, fetchImpl = fetch,
           ? { id: body.playlistId, external_urls: {} }
           : await spotifyFetch(session, "/me/playlists", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name, public: Boolean(body.public), description: "Created by PlayThisPic · tentative while tracks are matched" }) });
         if (body.playlistId && body.name) await spotifyFetch(session, `/playlists/${encodeURIComponent(body.playlistId)}`, { method: "PUT", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name, public: Boolean(body.public), description: "Created by PlayThisPic" }) });
-        if (removeUris.length) await spotifyFetch(session, `/playlists/${encodeURIComponent(playlist.id)}/items`, { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ tracks: removeUris.map((uri) => ({ uri })) }) });
+        if (removeUris.length) await spotifyFetch(session, `/playlists/${encodeURIComponent(playlist.id)}/items`, { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ items: removeUris.map((uri) => ({ uri })) }) });
         if (uris.length) await spotifyFetch(session, `/playlists/${encodeURIComponent(playlist.id)}/items`, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ uris }) });
         json(res, 201, { id: playlist.id, url: playlist.external_urls?.spotify || `https://open.spotify.com/playlist/${playlist.id}`, owner: me.display_name || me.id, count: uris.length });
       } catch (error) { json(res, error.status || 500, { error: error.message }); }
