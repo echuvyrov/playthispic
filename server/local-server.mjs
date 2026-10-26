@@ -2,9 +2,9 @@ import { createReadStream, existsSync } from "node:fs";
 import { createServer } from "node:http";
 import { extname, join, normalize, resolve } from "node:path";
 import { loadEnvFile } from "node:process";
-import { extractionInstructions, tracklistFormat, runExtractionHarness } from "./src/extraction.mjs";
-import { createBeatportAuth } from "./server/beatport-auth.mjs";
-import { createSpotifyIntegration } from "./server/spotify.mjs";
+import { extractionInstructions, tracklistFormat, runExtractionHarness } from "../src/extraction.mjs";
+import { createBeatportAuth } from "./beatport-auth.mjs";
+import { createSpotifyIntegration } from "./spotify.mjs";
 
 try {
   loadEnvFile();
@@ -12,7 +12,7 @@ try {
   if (error.code !== "ENOENT") throw error;
 }
 
-const root = process.cwd();
+const root = resolve(process.cwd(), "public");
 const port = Number(process.env.PORT || 5174);
 const model = process.env.OPENAI_OCR_MODEL || "gpt-5";
 

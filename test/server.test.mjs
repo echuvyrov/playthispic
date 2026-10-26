@@ -1,7 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { EventEmitter } from "node:events";
-import { createAppServer, extractImageText } from "../server.mjs";
+import { createAppServer, extractImageText } from "../server/local-server.mjs";
 
 test("extracts text from the raw Responses API output after reasoning items", async (t) => {
   const existing = process.env.OPENAI_API_KEY;

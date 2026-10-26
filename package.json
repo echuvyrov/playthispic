@@ -4,7 +4,7 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "node local-server.mjs",
+    "dev": "node server/local-server.mjs",
     "test": "node --test"
   }
 }

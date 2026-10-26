@@ -1,4 +1,4 @@
-import { createRequestHandler } from "../local-server.mjs";
+import { createRequestHandler } from "../server/local-server.mjs";
 
 const handler = createRequestHandler();
 
