@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "type": "module",
+  "main": "api/index.mjs",
   "scripts": {
     "dev": "node server/local-server.mjs",
     "test": "node --test"
