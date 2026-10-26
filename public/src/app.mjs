@@ -57,6 +57,9 @@ const elements = {
   skippedCount: $("#skippedCount"),
   loginBtn: $("#loginBtn"),
   loginDescription: $("#loginDescription"),
+  mobileSpotifyPrompt: $("#mobileSpotifyPrompt"),
+  mobileLoginBtn: $("#mobileLoginBtn"),
+  mobileLoginDescription: $("#mobileLoginDescription"),
   createBtn: $("#createBtn"),
   acceptAllBtn: $("#acceptAllBtn"),
   visibilityBtn: $("#visibilityBtn"),
@@ -498,12 +501,22 @@ async function refreshSpotifyStatus() {
       : !status.configured
         ? "Add SPOTIFY_CLIENT_ID to .env and restart the server."
         : status.message;
+    elements.mobileSpotifyPrompt.hidden = status.connected;
+    elements.mobileLoginBtn.disabled = !status.configured;
+    elements.mobileLoginBtn.textContent = !status.configured ? "Spotify setup required" : "Connect Spotify";
+    elements.mobileLoginDescription.textContent = !status.configured
+      ? "Spotify is not configured on this server yet."
+      : "Connect your account to match tracks and build your playlist.";
   } catch {
     state.connected = false;
     state.spotifyConfigured = false;
     elements.loginBtn.disabled = true;
     elements.loginBtn.textContent = "Spotify unavailable";
     elements.loginDescription.textContent = "Could not check the Spotify connection. Refresh the page to retry.";
+    elements.mobileSpotifyPrompt.hidden = false;
+    elements.mobileLoginBtn.disabled = true;
+    elements.mobileLoginBtn.textContent = "Spotify unavailable";
+    elements.mobileLoginDescription.textContent = "Could not check Spotify right now. Refresh to retry.";
   } finally {
     spotifyStatusPromise = null;
   }
@@ -783,6 +796,7 @@ function wireEvents() {
   elements.extractBtn.addEventListener("click", () => runExtraction("manual"));
   elements.demoBtn.addEventListener("click", () => runExtraction("demo"));
   elements.loginBtn.addEventListener("click", connectSpotify);
+  elements.mobileLoginBtn.addEventListener("click", connectSpotify);
   elements.createBtn.addEventListener("click", createPlaylist);
   elements.acceptAllBtn.addEventListener("click", () => void acceptAllMatched());
   elements.copyExportBtn.addEventListener("click", copyExport);
