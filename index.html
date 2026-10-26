@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CrateRadar · Tracklists to playlists</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="./src/styles.css" />
+  </head>
+  <body>
+    <div class="stage-glow" aria-hidden="true"></div>
+    <div class="noise" aria-hidden="true"></div>
+    <div class="global-drop" id="globalDrop" aria-hidden="true">
+      <div class="drop-frame">
+        <span class="corner corner-a"></span>
+        <span class="corner corner-b"></span>
+        <span class="corner corner-c"></span>
+        <span class="corner corner-d"></span>
+        <div class="drop-target-mark">
+          <span></span>
+        </div>
+        <p>Drop image anywhere</p>
+        <small>Reading starts automatically</small>
+      </div>
+    </div>
+
+    <main class="shell">
+      <header class="topbar">
+        <a class="brand" href="#" aria-label="CrateRadar home">
+          <span class="brand-mark">CR</span>
+          <span>
+            <strong>CrateRadar</strong>
+            <small>Tracklists to playlists</small>
+          </span>
+        </a>
+        <nav class="provider-rail" aria-label="Provider roadmap">
+          <button class="provider active" type="button" data-provider="spotify">
+            <span>01</span> Spotify
+          </button>
+          <button class="provider disabled" type="button" data-provider="beatport" title="Fallback links only">
+            <span>02</span> Beatport
+          </button>
+          <button class="provider disabled" type="button" data-provider="youtube" title="Planned v3">
+            <span>03</span> YouTube
+          </button>
+        </nav>
+      </header>
+
+      <section class="hero" aria-label="Image extraction">
+        <div class="hero-copy">
+          <p class="eyebrow">From the chart to your next set</p>
+          <h1>Play this pic.</h1>
+          <p class="lede">Drop a tracklist. Read the songs. Make it yours.</p>
+        </div>
+        <div class="hero-intake" id="radar" data-stage="idle">
+          <span class="radar-coordinate coordinate-left" aria-hidden="true">INPUT / 01</span>
+          <span class="radar-coordinate coordinate-right" aria-hidden="true">ARTIST + TITLE</span>
+          <button class="upload-core" id="uploadCore" type="button" aria-label="Choose a tracklist image">
+            <span class="orbit orbit-a" aria-hidden="true"></span>
+            <span class="orbit orbit-b" aria-hidden="true"></span>
+            <span class="upload-icon" aria-hidden="true"><span></span></span>
+            <span class="radar-copy" role="status" aria-live="polite" aria-atomic="true">
+              <strong id="signalLabel">Drop image</strong>
+              <small id="signalDetail">or click to upload · paste anywhere</small>
+            </span>
+          </button>
+          <div class="mini-modes" aria-label="Image input modes"><span>PNG</span><span>JPG</span><span>SCREENSHOT</span></div>
+        </div>
+        <p class="hero-caption">Artist, title &amp; chart position. Checked together.</p>
+      </section>
+
+      <section class="workbench" aria-label="Playlist builder">
+        <aside class="intake">
+          <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Upload image">
+            <input id="imageInput" type="file" accept="image/*" hidden />
+            
+            <div class="drop-copy">
+              <span class="hotkey">Paste / Drop / Click</span>
+              <strong>Tracklist image</strong>
+              <small>PNG, JPG, screenshots, posters, camera shots</small>
+            </div>
+          </div>
+
+          <div class="preview-wrap">
+            <img id="imagePreview" alt="Uploaded tracklist preview" />
+            <div class="placeholder-preview" id="previewPlaceholder">
+              <span></span>
+              <p>No image loaded</p>
+            </div>
+          </div>
+
+          <label class="manual-label" for="manualText">Track text / manual input</label>
+          <textarea
+            id="manualText"
+            spellcheck="false"
+            placeholder="One song per line: Artist - Title. Or upload an image above."
+          ></textarea>
+          <label class="mode-picker" for="extractMode">Scan mode
+            <select id="extractMode"><option value="auto">Auto detect</option><option value="tracks">Tracklist</option><option value="djs">DJ lineup</option></select>
+          </label>
+          <div class="intake-actions">
+            <button class="primary" id="extractBtn" type="button">Extract tracks</button>
+            <button class="ghost" id="demoBtn" type="button">Run demo</button>
+          </div>
+        </aside>
+
+        <section class="review-console" id="trackReview" aria-labelledby="trackReviewTitle" tabindex="-1">
+          <div class="console-head">
+            <div>
+              <p class="eyebrow">Your extracted songs</p>
+              <h2 id="trackReviewTitle">Track review</h2>
+            </div>
+            <div class="stats" aria-label="Playlist stats">
+              <span><strong id="acceptedCount">0</strong> matched</span>
+              <span><strong id="reviewCount">0</strong> needs match</span>
+              <span><strong id="skippedCount">0</strong> selected</span>
+            </div>
+          </div>
+
+          <p class="catalog-notice" id="catalogNotice">Connect Spotify to search its catalog. Beatport links remain available as a fallback.</p>
+          <div class="review-actions">
+            <button class="ghost" id="acceptAllBtn" type="button" disabled>Accept all matched</button>
+          </div>
+          <p class="validation-summary" id="validationSummary" hidden></p>
+          <div class="track-table" id="trackTable" aria-live="polite">
+            <div class="empty-state">
+              <span class="pulse-dot"></span>
+              <p>Load an image or text to start resolving tracks.</p>
+            </div>
+          </div>
+        </section>
+
+        <aside class="playlist-panel">
+          <div class="login-card">
+            <span class="status-light"></span>
+            <div>
+              <p class="eyebrow">Spotify account</p>
+              <h2>Connect account</h2>
+              <p id="loginDescription" aria-live="polite">Checking account connection…</p>
+            </div>
+            <button class="secondary" id="loginBtn" type="button" disabled>Checking connection…</button>
+            <a class="track-search" id="spotifySetupLink" href="https://developer.spotify.com/dashboard" target="_blank" rel="noopener noreferrer" hidden>Open Spotify developer dashboard ↗</a>
+          </div>
+
+          <div class="playlist-card">
+            <label for="playlistName">Playlist name</label>
+            <input id="playlistName" value="" placeholder="CrateRadar: Tracklist · Month Year" />
+            <div class="toggle-row">
+              <span>Visibility</span>
+              <button class="visibility" id="visibilityBtn" type="button" aria-pressed="false">Private</button>
+            </div>
+            <button class="primary wide" id="createBtn" type="button" disabled>Create Spotify Playlist</button>
+            <p class="fallback-note" id="fallbackNote">
+              Connect Spotify to create a playlist from your reviewed tracks.
+            </p>
+          </div>
+
+          <div class="tentative-card" id="tentativeCard">
+            <p class="eyebrow">Living playlist</p>
+            <h2>Tentative playlist</h2>
+            <p class="tentative-copy" id="tentativeCopy">Connect Spotify, then tracks will appear here as they are matched.</p>
+            <div class="tentative-list" id="tentativeList" aria-live="polite">
+              <p class="tentative-empty">No matched songs yet.</p>
+            </div>
+            <a class="track-search" id="tentativeLink" href="#" target="_blank" rel="noopener noreferrer" hidden>Open tentative playlist ↗</a>
+          </div>
+
+          <div class="result-card" id="resultCard" hidden>
+            <p class="eyebrow">Playlist output</p>
+            <h2 id="resultTitle">Ready</h2>
+            <p id="resultCopy"></p>
+            <div class="result-actions">
+              <a class="secondary link-button" id="playlistLink" href="#" target="_blank" rel="noreferrer">Open</a>
+              <button class="ghost" id="copyExportBtn" type="button">Copy export</button>
+            </div>
+          </div>
+        </aside>
+      </section>
+    </main>
+
+    <template id="trackRowTemplate">
+      <article class="track-row">
+        <div class="row-index"></div>
+        <div class="track-main">
+          <div class="track-fields">
+            <label>Artist<input class="artist-edit track-edit" placeholder="Missing artist" /></label>
+            <label>Title<input class="title-edit track-edit" placeholder="Missing title" /></label>
+          </div>
+          <p class="track-issues"></p>
+          <div class="candidate-list"></div>
+        </div>
+        <div class="row-actions">
+          <span class="confidence"></span>
+          <button class="mini accept" type="button">Accept</button>
+          <button class="mini skip" type="button">Skip</button>
+        </div>
+      </article>
+    </template>
+
+    <script type="module" src="./src/app.mjs"></script>
+  </body>
+</html>
