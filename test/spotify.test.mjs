@@ -97,6 +97,28 @@ test("tentative playlist can be created empty, then updated with a track", async
   assert.deepEqual(calls.at(-1).body, { uris: ["spotify:track:abc"] });
 });
 
+test("playlist metadata and removals tolerate Spotify's empty success responses", async () => {
+  const handler = createSpotifyIntegration({ env, fetchImpl: async (url) => {
+    if (url.includes("/api/token")) return token();
+    if (url.endsWith("/me")) return new Response(JSON.stringify({ id: "user" }));
+    if (url.endsWith("/playlists/playlist")) return new Response(null, { status: 200 });
+    if (url.includes("/playlists/playlist/items")) return new Response(null, { status: 200 });
+    return new Response(JSON.stringify({ snapshot_id: "snap" }));
+  } });
+  const start = await request(handler, "/auth/spotify/start");
+  const cookie = start.headers["Set-Cookie"].split(";")[0];
+  const auth = new URL(start.headers.Location);
+  await request(handler, `/auth/spotify/callback?code=code&state=${auth.searchParams.get("state")}`, { cookie });
+  const response = await request(handler, "/api/spotify/create-playlist", {
+    method: "POST",
+    cookie,
+    origin: "http://127.0.0.1:5174",
+    body: JSON.stringify({ playlistId: "playlist", name: "Updated", removeUris: ["spotify:track:old"], uris: ["spotify:track:new"] })
+  });
+  assert.equal(response.status, 201);
+  assert.equal(JSON.parse(response.body).count, 1);
+});
+
 test("Spotify callbacks reject mismatched state and playlist requests require a session", async () => {
   const handler = createSpotifyIntegration({ env, fetchImpl: async () => token() });
   const start = await request(handler, "/auth/spotify/start");

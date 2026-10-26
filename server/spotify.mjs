@@ -63,7 +63,8 @@ export function createSpotifyIntegration({ env = process.env, fetchImpl = fetch,
     if (!response.ok) {
       const error = new Error(`Spotify API request failed (${response.status}).`); error.status = response.status; throw error;
     }
-    return response.json();
+    const text = await response.text();
+    return text ? JSON.parse(text) : {};
   };
 
   return async function handleSpotify(req, res) {
