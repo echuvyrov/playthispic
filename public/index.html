@@ -176,7 +176,36 @@
           </div>
         </aside>
       </section>
+
+      <section class="support-creator" id="supportCreator" aria-labelledby="supportTitle">
+        <div class="support-signal" aria-hidden="true"><span></span><span></span><span></span></div>
+        <div class="support-copy">
+          <p class="eyebrow">Keep the signal alive</p>
+          <h2 id="supportTitle">Support Creator</h2>
+          <p>Builder runs on vibes; sadly, hardware is pricey.</p>
+        </div>
+        <button class="secondary support-trigger" id="supportTrigger" type="button">Support Creator <span aria-hidden="true">↗</span></button>
+      </section>
     </main>
+
+    <div class="support-modal" id="supportModal" hidden>
+      <div class="support-backdrop" data-support-close></div>
+      <section class="support-dialog" role="dialog" aria-modal="true" aria-labelledby="supportDialogTitle" aria-describedby="supportDialogCopy" tabindex="-1">
+        <button class="modal-close" id="supportClose" type="button" aria-label="Close support dialog">×</button>
+        <p class="eyebrow">One-time transmission</p>
+        <h2 id="supportDialogTitle">Support Creator</h2>
+        <p id="supportDialogCopy" class="support-dialog-copy">Pick an amount to help keep PlayThisPic humming.</p>
+        <div class="amount-grid" role="group" aria-label="Support amount">
+          <button class="amount-option" type="button" data-amount="1" aria-pressed="false">$1</button>
+          <button class="amount-option" type="button" data-amount="3" aria-pressed="true">$3</button>
+          <button class="amount-option" type="button" data-amount="5" aria-pressed="false">$5</button>
+          <button class="amount-option" type="button" data-amount="10" aria-pressed="false">$10</button>
+        </div>
+        <p class="support-error" id="supportError" role="alert" hidden></p>
+        <button class="primary wide support-submit" id="supportSubmit" type="button">Continue to secure checkout <span aria-hidden="true">↗</span></button>
+        <p class="support-footnote">Stripe-hosted checkout · USD · one-time</p>
+      </section>
+    </div>
 
     <template id="trackRowTemplate">
       <article class="track-row">

@@ -22,6 +22,19 @@ Beatport remains a fallback search link. Spotify is the primary provider for cat
 
 Image OCR requires `OPENAI_API_KEY` in the server environment. The app sends image data URLs to the local `/api/extract-image` route, which calls the OpenAI Responses API with an image input.
 
+## Creator support
+
+The Support Creator flow uses Stripe Checkout Sessions. Add these server environment variables before testing it:
+
+```env
+STRIPE_SECRET_KEY=sk_test_...
+NEXT_PUBLIC_SITE_URL=http://localhost:5174
+```
+
+`STRIPE_SECRET_KEY` is server-only and must never be added to client code or committed in `.env.local`. In production, use a live key and the public production URL, for example `NEXT_PUBLIC_SITE_URL=https://your-production-domain.com`.
+
+Start the app with `npm run dev`, click Support Creator, choose an amount, and use Stripe test Checkout. Successful and cancelled sessions return to `/?support=success` and `/?support=cancelled` respectively.
+
 Spotify search and playlist creation require a Spotify Developer app and a user with Spotify Premium. The Spotify Web API supports catalog search, playlist creation, and adding track URIs with OAuth scopes; see the [official Spotify API documentation](https://developer.spotify.com/documentation/web-api).
 
 ## Run

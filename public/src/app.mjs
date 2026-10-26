@@ -72,7 +72,15 @@ const elements = {
   tentativeLink: $("#tentativeLink"),
   signalLabel: $("#signalLabel"),
   signalDetail: $("#signalDetail"),
-  globalDrop: $("#globalDrop")
+  globalDrop: $("#globalDrop"),
+  supportCreator: $("#supportCreator"),
+  supportTrigger: $("#supportTrigger"),
+  supportModal: $("#supportModal"),
+  supportDialog: $(".support-dialog"),
+  supportClose: $("#supportClose"),
+  supportSubmit: $("#supportSubmit"),
+  supportError: $("#supportError"),
+  amountOptions: [...document.querySelectorAll(".amount-option")]
 };
 
 function setSignal(label, detail, stage = "idle") {
@@ -606,6 +614,101 @@ async function copyExport() {
   }, 1200);
 }
 
+let selectedSupportAmount = 3;
+let supportReturnFocus;
+let supportThankYou = false;
+
+function renderSupportState() {
+  const status = new URLSearchParams(window.location.search).get("support");
+  if (!status || !["success", "cancelled"].includes(status)) return;
+  const success = status === "success";
+  elements.supportCreator.classList.add("support-complete", success ? "is-success" : "is-cancelled");
+  elements.supportCreator.querySelector(".support-signal").hidden = true;
+  elements.supportCreator.querySelector(".support-copy").innerHTML = `<p class="eyebrow">${success ? "Signal received" : "Checkout paused"}</p><h2>${success ? "Thank you." : "No worries."}</h2><p>${success ? "Your support keeps the lights on and the project moving forward." : "The project will still be here."}</p>`;
+  elements.supportTrigger.hidden = true;
+  if (success) {
+    supportThankYou = true;
+    elements.supportDialog.querySelector(".eyebrow").textContent = "Signal received";
+    elements.supportDialog.querySelector("#supportDialogTitle").textContent = "Thank you.";
+    elements.supportDialog.querySelector("#supportDialogCopy").textContent = "Your support keeps the lights on and the project moving forward.";
+    elements.supportDialog.querySelector(".amount-grid").hidden = true;
+    elements.supportError.hidden = true;
+    elements.supportSubmit.textContent = "Back to building";
+    elements.supportModal.hidden = false;
+    document.body.classList.add("modal-open");
+    elements.supportDialog.focus();
+  }
+}
+
+function setSupportAmount(amount) {
+  selectedSupportAmount = amount;
+  elements.amountOptions.forEach((option) => {
+    const selected = Number(option.dataset.amount) === amount;
+    option.classList.toggle("selected", selected);
+    option.setAttribute("aria-pressed", String(selected));
+  });
+}
+
+function openSupportModal() {
+  supportReturnFocus = document.activeElement;
+  elements.supportError.hidden = true;
+  elements.supportModal.hidden = false;
+  document.body.classList.add("modal-open");
+  setSupportAmount(selectedSupportAmount);
+  elements.supportDialog.focus();
+}
+
+function closeSupportModal() {
+  elements.supportModal.hidden = true;
+  document.body.classList.remove("modal-open");
+  supportReturnFocus?.focus?.();
+}
+
+async function startSupportCheckout() {
+  if (supportThankYou) {
+    closeSupportModal();
+    return;
+  }
+  elements.supportSubmit.disabled = true;
+  elements.supportSubmit.textContent = "Preparing secure checkout…";
+  elements.supportError.hidden = true;
+  try {
+    const response = await fetch("/api/support", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({ amount: selectedSupportAmount })
+    });
+    const payload = await response.json().catch(() => ({}));
+    if (!response.ok || !payload.url) throw new Error(payload.error || "Could not start checkout. Please try again.");
+    window.location.assign(payload.url);
+  } catch (error) {
+    elements.supportError.textContent = error.message;
+    elements.supportError.hidden = false;
+    elements.supportSubmit.disabled = false;
+    elements.supportSubmit.textContent = "Continue to secure checkout ↗";
+  }
+}
+
+function handleSupportKeydown(event) {
+  if (elements.supportModal.hidden) return;
+  if (event.key === "Escape") {
+    event.preventDefault();
+    closeSupportModal();
+    return;
+  }
+  if (event.key !== "Tab") return;
+  const focusable = [elements.supportClose, ...elements.amountOptions, elements.supportSubmit].filter((element) => !element.disabled && !element.hidden && element.offsetParent !== null);
+  const first = focusable[0];
+  const last = focusable[focusable.length - 1];
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault();
+    last.focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
+}
+
 function wireEvents() {
 
   elements.uploadCore.addEventListener("click", () => elements.imageInput.click());
@@ -676,6 +779,12 @@ function wireEvents() {
   elements.createBtn.addEventListener("click", createPlaylist);
   elements.acceptAllBtn.addEventListener("click", () => void acceptAllMatched());
   elements.copyExportBtn.addEventListener("click", copyExport);
+  elements.supportTrigger.addEventListener("click", openSupportModal);
+  elements.supportClose.addEventListener("click", closeSupportModal);
+  elements.supportModal.querySelector("[data-support-close]").addEventListener("click", closeSupportModal);
+  elements.amountOptions.forEach((option) => option.addEventListener("click", () => setSupportAmount(Number(option.dataset.amount))));
+  elements.supportSubmit.addEventListener("click", () => void startSupportCheckout());
+  document.addEventListener("keydown", handleSupportKeydown);
   elements.visibilityBtn.addEventListener("click", () => {
     state.visibility = state.visibility === "Private" ? "Public" : "Private";
     elements.visibilityBtn.textContent = state.visibility;
@@ -684,5 +793,6 @@ function wireEvents() {
 }
 
 wireEvents();
+renderSupportState();
 renderRows();
 void refreshSpotifyStatus();

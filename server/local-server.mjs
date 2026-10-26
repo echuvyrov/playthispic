@@ -5,6 +5,7 @@ import { loadEnvFile } from "node:process";
 import { extractionInstructions, tracklistFormat, runExtractionHarness } from "../public/src/extraction.mjs";
 import { createBeatportAuth } from "./beatport-auth.mjs";
 import { createSpotifyIntegration } from "./spotify.mjs";
+import Stripe from "stripe";
 
 try {
   loadEnvFile();
@@ -57,6 +58,44 @@ function extractJsonObject(text) {
     if (!match) throw new Error("OpenAI response did not contain JSON.");
     return JSON.parse(match[0]);
   }
+}
+
+const SUPPORT_AMOUNTS = new Set([1, 3, 5, 10]);
+
+export async function createSupportCheckout({ amount }) {
+  const numericAmount = typeof amount === "number" ? amount : Number(amount);
+  if (!Number.isInteger(numericAmount) || !SUPPORT_AMOUNTS.has(numericAmount)) {
+    const error = new Error("Choose a support amount of $1, $3, $5, or $10.");
+    error.status = 400;
+    throw error;
+  }
+  if (!process.env.STRIPE_SECRET_KEY) {
+    const error = new Error("Stripe support is not configured yet.");
+    error.status = 503;
+    throw error;
+  }
+  if (!process.env.NEXT_PUBLIC_SITE_URL) {
+    const error = new Error("NEXT_PUBLIC_SITE_URL is not configured yet.");
+    error.status = 503;
+    throw error;
+  }
+
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+  return stripe.checkout.sessions.create({
+    mode: "payment",
+    submit_type: "donate",
+    line_items: [{
+      quantity: 1,
+      price_data: {
+        currency: "usd",
+        unit_amount: numericAmount * 100,
+        product_data: { name: "Support Creator" }
+      }
+    }],
+    metadata: { source: "playthispic-support", amount: String(numericAmount) },
+    success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/?support=success`,
+    cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/?support=cancelled`
+  });
 }
 
 export async function extractImageText(dataUrl, onProgress, signal = AbortSignal.timeout(120_000), mode = "auto") {
@@ -123,6 +162,17 @@ export async function extractImageText(dataUrl, onProgress, signal = AbortSignal
 }
 
 async function handleApi(request, response) {
+  if (request.method === "POST" && request.url === "/api/support") {
+    try {
+      const { amount } = await readJson(request);
+      const session = await createSupportCheckout({ amount });
+      return sendJson(response, 200, { url: session.url });
+    } catch (error) {
+      console.error(`[Support] Checkout failed; status=${error.status || 500}; type=${error.type || error.name || "unknown"}`);
+      return sendJson(response, error.status || 500, { error: error.message || "Could not start checkout." });
+    }
+  }
+
   if (request.method === "POST" && request.url === "/api/extract-image") {
     const started = Date.now();
     console.log("[OCR] Image extraction request received");
@@ -194,6 +244,10 @@ export function createAppServer() {
 
 export function createRequestHandler({ handleBeatport = createBeatportAuth(), handleSpotify = createSpotifyIntegration() } = {}) {
   return async (request, response) => {
+    // Browsers and hosted checkout redirects can occasionally produce a
+    // network-path-looking root request (`//?support=success`). Normalize it
+    // before any handler constructs a URL from the request target.
+    if (request.url?.startsWith("//")) request.url = request.url.slice(1);
     if (await handleBeatport(request, response)) return;
     if (await handleSpotify(request, response)) return;
     if (request.url?.startsWith("/api/")) {

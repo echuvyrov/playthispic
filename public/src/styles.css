@@ -1197,6 +1197,59 @@ h2 {
 .secondary:disabled { opacity: .5; cursor: not-allowed; }
 .empty-state .pulse-dot { animation: none; }
 [hidden] { display: none !important; }
+
+.support-creator {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 22px;
+  width: min(980px, 100%);
+  margin: 0 auto 42px;
+  padding: 18px 22px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--acid);
+  background: linear-gradient(110deg, rgba(185, 255, 50, .08), rgba(37, 244, 238, .04) 55%, rgba(0, 0, 0, .28));
+  box-shadow: 0 18px 50px rgba(0, 0, 0, .24);
+  animation: rise 680ms 140ms both;
+}
+.support-signal { display: flex; align-items: end; gap: 4px; height: 34px; }
+.support-signal span { display: block; width: 5px; background: var(--cyan); box-shadow: 0 0 12px rgba(37, 244, 238, .5); }
+.support-signal span:nth-child(1) { height: 14px; }
+.support-signal span:nth-child(2) { height: 28px; background: var(--acid); }
+.support-signal span:nth-child(3) { height: 20px; }
+.support-copy h2 { margin: 0; font-size: 1.35rem; }
+.support-copy > p:last-child { margin: 4px 0 0; color: var(--muted); font-family: "Avenir Next", sans-serif; font-size: .86rem; }
+.support-trigger { white-space: nowrap; }
+.support-trigger span, .support-submit span { margin-left: 8px; color: var(--acid); }
+.support-complete { border-left-color: var(--cyan); }
+.support-complete.is-cancelled { border-left-color: var(--amber); }
+.support-complete.is-success .support-copy h2 { color: var(--acid); }
+.support-complete.is-cancelled .support-copy h2 { color: var(--amber); }
+.support-modal { position: fixed; inset: 0; z-index: 40; display: grid; place-items: center; padding: 20px; }
+.support-backdrop { position: absolute; inset: 0; background: rgba(0, 0, 0, .78); backdrop-filter: blur(12px) saturate(1.3); animation: modalFade 180ms ease both; }
+.support-dialog { position: relative; width: min(480px, 100%); padding: 32px; border: 1px solid rgba(37, 244, 238, .36); border-top: 3px solid var(--acid); background: linear-gradient(145deg, rgba(16, 20, 23, .98), rgba(4, 7, 8, .98)); box-shadow: 0 30px 100px rgba(0, 0, 0, .7), 0 0 80px rgba(37, 244, 238, .12); animation: modalEnter 220ms cubic-bezier(.2, .8, .2, 1) both; }
+.support-dialog:focus { outline: none; }
+.modal-close { position: absolute; top: 12px; right: 14px; width: 36px; height: 36px; border: 1px solid var(--line); background: transparent; color: var(--muted); font-size: 1.6rem; line-height: 1; }
+.modal-close:hover, .modal-close:focus-visible { border-color: var(--cyan); color: var(--text); }
+.support-dialog h2 { margin: 0; font-size: clamp(2rem, 6vw, 3.2rem); line-height: .9; }
+.support-dialog-copy { margin: 14px 0 24px; color: #c1cec9; font-family: "Avenir Next", sans-serif; line-height: 1.5; }
+.amount-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.amount-option { min-height: 62px; border: 1px solid var(--line); background: rgba(0, 0, 0, .35); color: var(--text); font-size: 1.25rem; font-weight: 900; transition: border-color 160ms ease, background 160ms ease, transform 160ms ease; }
+.amount-option:hover, .amount-option:focus-visible { border-color: var(--cyan); transform: translateY(-2px); }
+.amount-option.selected { border-color: var(--acid); background: linear-gradient(135deg, rgba(185, 255, 50, .22), rgba(37, 244, 238, .08)); color: var(--acid); box-shadow: inset 0 0 22px rgba(185, 255, 50, .08); }
+.support-submit { margin-top: 22px; }
+.support-error { margin: 14px 0 0; padding: 10px 12px; border-left: 2px solid var(--red); background: rgba(255, 54, 94, .1); color: #ff9bb0; font-family: "Avenir Next", sans-serif; font-size: .82rem; line-height: 1.4; }
+.support-footnote { margin: 16px 0 0; color: var(--muted); font-family: "Avenir Next", sans-serif; font-size: .7rem; text-align: center; }
+body.modal-open { overflow: hidden; }
+@keyframes modalFade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes modalEnter { from { opacity: 0; transform: translateY(12px) scale(.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@media (max-width: 720px) {
+  .support-creator { grid-template-columns: auto minmax(0, 1fr); margin-bottom: 26px; padding: 16px; }
+  .support-trigger { grid-column: 1 / -1; width: 100%; }
+  .support-dialog { padding: 28px 20px 22px; }
+  .amount-option { min-height: 56px; }
+}
 @media (max-width: 1180px) {
   .workbench { grid-template-columns: minmax(230px, .7fr) minmax(0, 1.3fr); }
   .playlist-panel { grid-column: 1 / -1; grid-template-columns: 1fr 1fr; }

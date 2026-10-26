@@ -6,6 +6,12 @@
   "main": "api/index.mjs",
   "scripts": {
     "dev": "node server/local-server.mjs",
-    "test": "node --test"
+    "test": "node --test",
+    "typecheck": "node --check server/local-server.mjs && node --check public/src/app.mjs",
+    "lint": "node --check server/local-server.mjs && node --check public/src/app.mjs",
+    "build": "node --check server/local-server.mjs && node --check public/src/app.mjs"
+  },
+  "dependencies": {
+    "stripe": "^23.0.1"
   }
 }
